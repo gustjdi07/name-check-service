@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>야간자율학습 출석체크 시스템</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>야간자율학습 출석체크</h1>
+        <form id="attendanceForm">
+            <input type="hidden" id="studentId" name="studentId">
+            <input type="hidden" id="date" name="date">
+            <input type="hidden" id="startTime" name="startTime">
+            <input type="hidden" id="endTime" name="endTime">
+            <input type="hidden" id="attendanceCode" name="attendanceCode">
+            <button type="submit">출석 체크</button>
+        </form>
+        <div id="result"></div>
+        <div id="stats"></div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
