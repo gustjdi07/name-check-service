@@ -7,11 +7,10 @@ const statsDiv = document.getElementById('stats');
 
 // 페이지 로드 시 오늘 날짜와 현재 시간 자동 입력
 window.addEventListener('DOMContentLoaded', () => {
-    // 학번 자동 기록 (예시: localStorage, 실제 환경에 맞게 수정)
-    let studentId = localStorage.getItem('studentId');
-    if (!studentId) {
+    // 매번 접속 시 학번 입력
+    let studentId = '';
+    while (!studentId) {
         studentId = prompt('학번을 입력하세요:');
-        localStorage.setItem('studentId', studentId);
     }
     form.studentId.value = studentId;
 });
@@ -49,7 +48,7 @@ form.addEventListener('submit', function(e) {
         recordDateTime
     });
 
-    resultDiv.textContent = `출석이 성공적으로 기록되었습니다!\n출석 코드: ${attendanceCode}\n기록 시각: ${recordDateTime}`;
+    resultDiv.textContent = `출석이 성공적으로 기록되었습니다!\n학번: ${studentId}\n출석 코드: ${attendanceCode}\n기록 시각: ${recordDateTime}`;
     updateStats();
 });
 
