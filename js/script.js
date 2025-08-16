@@ -120,8 +120,8 @@ checkinBtn.addEventListener('click', async function() {
         alert('출석체크에 실패했습니다: ' + error.message);
     } finally {
         // 버튼 다시 활성화
-        attendanceBtn.disabled = false;
-        attendanceBtn.textContent = '출석체크';
+        checkinBtn.disabled = false;
+        checkinBtn.textContent = '출석체크';
     }
 });
 
