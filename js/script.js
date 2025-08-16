@@ -17,11 +17,7 @@ function hideStudentIdModal() {
     document.getElementById('studentIdModal').style.display = 'none';
 }
 
-window.addEventListener('load', function() {
-    if (!studentId || studentId.trim() === '') {
-        showStudentIdModal();
-    }
-});
+// 페이지 로드시에는 학번 입력 모달을 띄우지 않음
 
 document.getElementById('studentIdSubmit').addEventListener('click', function() {
     const input = document.getElementById('studentIdInput').value;
@@ -41,18 +37,18 @@ document.getElementById('studentIdInput').addEventListener('keydown', function(e
 });
 
 // 출석체크 버튼과 시간 표시 기능
-const attendanceBtn = document.getElementById('attendanceBtn');
+const checkinBtn = document.getElementById('checkinBtn');
 const timeDisplay = document.getElementById('timeDisplay');
 
-attendanceBtn.addEventListener('click', async function() {
+checkinBtn.addEventListener('click', async function() {
     if (!studentId || studentId.trim() === '') {
-        alert('학번이 입력되지 않았습니다. 페이지를 새로고침해주세요.');
+        showStudentIdModal();
         return;
     }
     
     // 버튼 비활성화
-    attendanceBtn.disabled = true;
-    attendanceBtn.textContent = '출석체크 중...';
+    checkinBtn.disabled = true;
+    checkinBtn.textContent = '출석체크 중...';
     
     try {
         const now = new Date();
