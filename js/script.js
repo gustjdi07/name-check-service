@@ -4,6 +4,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // 학번 저장 변수
 let studentId = '';
+let checkoutStudentId = '';
+let isCheckoutMode = false;
 
 
 // 학번 입력 모달 관련 코드
@@ -11,6 +13,8 @@ function showStudentIdModal() {
     document.getElementById('studentIdModal').style.display = 'flex';
     document.getElementById('studentIdInput').value = '';
     document.getElementById('studentIdError').style.display = 'none';
+    // 모달 제목 변경
+    document.querySelector('#studentIdModal h2').textContent = isCheckoutMode ? '퇴실 학번 입력' : '학번 입력';
 }
 
 function hideStudentIdModal() {
@@ -26,8 +30,14 @@ document.getElementById('studentIdSubmit').addEventListener('click', function() 
         document.getElementById('studentIdError').style.display = 'block';
         return;
     }
-    studentId = input.trim();
-    hideStudentIdModal();
+    if (isCheckoutMode) {
+        checkoutStudentId = input.trim();
+        hideStudentIdModal();
+        handleCheckout(checkoutStudentId);
+    } else {
+        studentId = input.trim();
+        hideStudentIdModal();
+    }
 });
 
 document.getElementById('studentIdInput').addEventListener('keydown', function(e) {
@@ -128,21 +138,14 @@ checkinBtn.addEventListener('click', async function() {
 // 퇴실체크 버튼 기능
 const checkoutBtn = document.getElementById('checkoutBtn');
 
-checkoutBtn.addEventListener('click', async function() {
-    // 퇴실할 학생의 학번 입력 받기
-    let checkoutStudentId = prompt('퇴실할 학생의 학번을 입력해주세요:');
-    
-    if (!checkoutStudentId || checkoutStudentId.trim() === '') {
-        alert('올바른 학번을 입력해주세요.');
-        return;
-    }
-    
-    checkoutStudentId = checkoutStudentId.trim();
-    
-    // 버튼 비활성화
+checkoutBtn.addEventListener('click', function() {
+    isCheckoutMode = true;
+    showStudentIdModal();
+});
+
+async function handleCheckout(checkoutStudentId) {
     checkoutBtn.disabled = true;
     checkoutBtn.textContent = '퇴실체크 중...';
-    
     try {
         const now = new Date();
         const currentTime = now.toLocaleString('ko-KR', {
@@ -153,36 +156,29 @@ checkoutBtn.addEventListener('click', async function() {
             minute: '2-digit',
             second: '2-digit'
         });
-        
         // 현재 날짜의 시작 시간(오후 4시)과 종료 시간(다음날 0시) 설정
         const todayStart = new Date(now);
-        // 현재 시간이 오전 0시~오후 4시 사이라면 전날 오후 4시부터 자정까지를 검색
         if (now.getHours() < 16) {
             todayStart.setDate(todayStart.getDate() - 1);
         }
         todayStart.setHours(16, 0, 0, 0);
         const todayEnd = new Date(todayStart);
         todayEnd.setHours(24, 0, 0, 0);
-        
         // 오늘의 출석 기록 확인
         const { data: todayCheck, error: checkError } = await supabase
             .from('check')
             .select('*')
             .eq('student_id', checkoutStudentId)
             .gte('checkin_time', todayStart.toISOString())
-            .lt('checkin_time', todayEnd.toISOString())
-            
+            .lt('checkin_time', todayEnd.toISOString());
         if (checkError) throw checkError;
-        
         if (!todayCheck || todayCheck.length === 0) {
             throw new Error('오늘의 출석 기록이 없습니다.');
         }
-        
         // 이미 퇴실 체크가 되어있는지 확인
         if (todayCheck[0].checkout_time !== null) {
             throw new Error('이미 퇴실 처리가 완료되었습니다.');
         }
-        
         // 퇴실 시간 업데이트
         const { data, error } = await supabase
             .from('check')
@@ -190,18 +186,14 @@ checkoutBtn.addEventListener('click', async function() {
             .eq('student_id', checkoutStudentId)
             .gte('checkin_time', todayStart.toISOString())
             .lt('checkin_time', todayEnd.toISOString());
-        
         if (error) throw error;
-        
         timeDisplay.innerHTML = `
             <div style="margin-bottom: 10px; color: green;"><strong>✅ 퇴실체크가 완료되었습니다!</strong></div>
             <div style="margin-bottom: 10px;"><strong>학번:</strong> ${checkoutStudentId}</div>
             <div><strong>퇴실 시간:</strong> ${currentTime}</div>
         `;
-        
         alert('퇴실체크가 완료되었습니다!');
         console.log('퇴실 시간 저장 성공:', data);
-        
     } catch (error) {
         console.error('퇴실체크 오류:', error);
         timeDisplay.innerHTML = `
@@ -209,8 +201,8 @@ checkoutBtn.addEventListener('click', async function() {
         `;
         alert('퇴실체크에 실패했습니다: ' + error.message);
     } finally {
-        // 버튼 다시 활성화
         checkoutBtn.disabled = false;
         checkoutBtn.textContent = '퇴실체크';
+        isCheckoutMode = false;
     }
-});
+}
