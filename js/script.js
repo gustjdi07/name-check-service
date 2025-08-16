@@ -5,18 +5,39 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 // 학번 저장 변수
 let studentId = '';
 
-// 페이지 로드시 학번 입력받기
+
+// 학번 입력 모달 관련 코드
+function showStudentIdModal() {
+    document.getElementById('studentIdModal').style.display = 'flex';
+    document.getElementById('studentIdInput').value = '';
+    document.getElementById('studentIdError').style.display = 'none';
+}
+
+function hideStudentIdModal() {
+    document.getElementById('studentIdModal').style.display = 'none';
+}
+
 window.addEventListener('load', function() {
-    while (!studentId || studentId.trim() === '') {
-        studentId = prompt('학번을 입력해주세요:');
-        if (studentId === null) {
-            // 사용자가 취소를 누른 경우
-            alert('학번 입력이 필요합니다.');
-        } else if (studentId.trim() === '') {
-            alert('올바른 학번을 입력해주세요.');
-        }
+    if (!studentId || studentId.trim() === '') {
+        showStudentIdModal();
     }
-    studentId = studentId.trim();
+});
+
+document.getElementById('studentIdSubmit').addEventListener('click', function() {
+    const input = document.getElementById('studentIdInput').value;
+    if (!input || input.trim() === '') {
+        document.getElementById('studentIdError').textContent = '올바른 학번을 입력해주세요.';
+        document.getElementById('studentIdError').style.display = 'block';
+        return;
+    }
+    studentId = input.trim();
+    hideStudentIdModal();
+});
+
+document.getElementById('studentIdInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('studentIdSubmit').click();
+    }
 });
 
 // 출석체크 버튼과 시간 표시 기능

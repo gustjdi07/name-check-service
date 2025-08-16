@@ -1,3 +1,43 @@
+/* 학번 입력 모달 스타일 */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: #fff;
+    padding: 30px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    min-width: 300px;
+    text-align: center;
+}
+.modal-content input {
+    width: 80%;
+    padding: 8px;
+    margin-top: 12px;
+    font-size: 16px;
+}
+.modal-content button {
+    margin-top: 16px;
+    padding: 8px 24px;
+    font-size: 16px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.modal-content button:hover {
+    background: #1565c0;
+}
 body {
     font-family: 'Noto Sans KR', sans-serif;
     background: #f4f6fb;
