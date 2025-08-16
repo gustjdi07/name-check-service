@@ -3,23 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>야간자율학습 출석체크 시스템</title>
-    <link rel="stylesheet" href="style.css">
+    <title>야간자율학습 출석체크</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
         <h1>야간자율학습 출석체크</h1>
-        <form id="attendanceForm">
-            <input type="hidden" id="studentId" name="studentId">
-            <input type="hidden" id="date" name="date">
-            <input type="hidden" id="startTime" name="startTime">
-            <input type="hidden" id="endTime" name="endTime">
-            <input type="hidden" id="attendanceCode" name="attendanceCode">
-            <button type="submit">출석 체크</button>
-        </form>
-        <div id="result"></div>
-        <div id="stats"></div>
+        <button id="attendanceBtn">출석체크</button>
+        <div id="timeDisplay"></div>
     </div>
-    <script src="app.js"></script>
+    
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
