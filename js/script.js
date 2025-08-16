@@ -35,6 +35,33 @@ attendanceBtn.addEventListener('click', async function() {
     
     try {
         const now = new Date();
+        
+        // 출석 가능 시간 체크 (16:00 ~ 23:59)
+        const hour = now.getHours();
+        if (hour < 16 || hour >= 24) {
+            throw new Error('출석 가능 시간이 아닙니다. (오후 4시 ~ 오후 12시)');
+        }
+        
+        // 현재 날짜의 시작 시간(오후 4시)과 종료 시간(다음날 0시) 설정
+        const todayStart = new Date(now);
+        todayStart.setHours(16, 0, 0, 0);
+        const todayEnd = new Date(now);
+        todayEnd.setHours(24, 0, 0, 0);
+        
+        // 중복 출석 체크
+        const { data: existingCheck, error: checkError } = await supabase
+            .from('check')
+            .select('*')
+            .eq('student_id', studentId)
+            .gte('checkin_time', todayStart.toISOString())
+            .lt('checkin_time', todayEnd.toISOString());
+            
+        if (checkError) throw checkError;
+        
+        if (existingCheck && existingCheck.length > 0) {
+            throw new Error('이미 오늘 출석한 기록이 있습니다.');
+        }
+        
         const currentTime = now.toLocaleString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
@@ -115,15 +142,38 @@ checkoutBtn.addEventListener('click', async function() {
         // 한국 시간으로 조정
         const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
         
+        // 현재 날짜의 시작 시간(오후 4시)과 종료 시간(다음날 0시) 설정
+        const todayStart = new Date(now);
+        todayStart.setHours(16, 0, 0, 0);
+        const todayEnd = new Date(now);
+        todayEnd.setHours(24, 0, 0, 0);
+        
+        // 오늘의 출석 기록 확인
+        const { data: todayCheck, error: checkError } = await supabase
+            .from('check')
+            .select('*')
+            .eq('student_id', checkoutStudentId)
+            .gte('checkin_time', todayStart.toISOString())
+            .lt('checkin_time', todayEnd.toISOString())
+            .order('checkin_time', { ascending: false })
+            .limit(1);
+            
+        if (checkError) throw checkError;
+        
+        if (!todayCheck || todayCheck.length === 0) {
+            throw new Error('오늘의 출석 기록이 없습니다.');
+        }
+        
+        // 이미 퇴실 체크가 되어있는지 확인
+        if (todayCheck[0].checkout_time !== null) {
+            throw new Error('이미 퇴실 처리가 완료되었습니다.');
+        }
+        
         // 퇴실 시간 업데이트
         const { data, error } = await supabase
             .from('check')
-            .insert([
-                {
-                    student_id: checkoutStudentId,
-                    checkout_time: koreaTime.toISOString()
-                }
-            ]);
+            .update({ checkout_time: koreaTime.toISOString() })
+            .eq('id', todayCheck[0].id);
         
         if (error) throw error;
         
