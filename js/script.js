@@ -59,9 +59,14 @@ attendanceBtn.addEventListener('click', async function() {
         if (checkError) throw checkError;
         
         if (existingCheck && existingCheck.length > 0) {
-            throw new Error('이미 오늘 출석한 기록이 있습니다.');
+            timeDisplay.innerHTML = `
+                <div style="color: orange;"><strong>⚠️ 이미 오늘 출석한 기록이 있습니다.</strong></div>
+                <div style="margin-bottom: 10px;"><strong>학번:</strong> ${studentId}</div>
+                <div><strong>출석 시간:</strong> ${existingCheck[0].checkin_time}</div>
+            `;
+            alert('이미 오늘 출석한 기록이 있습니다.');
+            return;
         }
-        
         const currentTime = now.toLocaleString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
@@ -70,7 +75,6 @@ attendanceBtn.addEventListener('click', async function() {
             minute: '2-digit',
             second: '2-digit'
         });
-        
         // Supabase에 출석 데이터 저장
         const { data, error } = await supabase
             .from('check')
@@ -80,17 +84,14 @@ attendanceBtn.addEventListener('click', async function() {
                     checkin_time: now.toISOString()
                 }
             ]);
-        
         if (error) {
             throw error;
         }
-        
         timeDisplay.innerHTML = `
             <div style="margin-bottom: 10px; color: green;"><strong>✅ 출석체크가 완료되었습니다!</strong></div>
             <div style="margin-bottom: 10px;"><strong>학번:</strong> ${studentId}</div>
             <div><strong>출석 시간:</strong> ${currentTime}</div>
         `;
-        
         alert('출석체크가 완료되었습니다!');
         console.log('출석 기록 저장 성공:', data);
         
