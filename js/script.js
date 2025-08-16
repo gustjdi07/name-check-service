@@ -71,16 +71,13 @@ attendanceBtn.addEventListener('click', async function() {
             second: '2-digit'
         });
         
-        // 한국 시간으로 조정
-        const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
-        
         // Supabase에 출석 데이터 저장
         const { data, error } = await supabase
             .from('check')
             .insert([
                 {
                     student_id: studentId,
-                    checkin_time: koreaTime.toISOString()
+                    checkin_time: now.toISOString()
                 }
             ]);
         
@@ -139,13 +136,14 @@ checkoutBtn.addEventListener('click', async function() {
             second: '2-digit'
         });
         
-        // 한국 시간으로 조정
-        const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
-        
         // 현재 날짜의 시작 시간(오후 4시)과 종료 시간(다음날 0시) 설정
         const todayStart = new Date(now);
+        // 현재 시간이 오전 0시~오후 4시 사이라면 전날 오후 4시부터 자정까지를 검색
+        if (now.getHours() < 16) {
+            todayStart.setDate(todayStart.getDate() - 1);
+        }
         todayStart.setHours(16, 0, 0, 0);
-        const todayEnd = new Date(now);
+        const todayEnd = new Date(todayStart);
         todayEnd.setHours(24, 0, 0, 0);
         
         // 오늘의 출석 기록 확인
@@ -155,8 +153,6 @@ checkoutBtn.addEventListener('click', async function() {
             .eq('student_id', checkoutStudentId)
             .gte('checkin_time', todayStart.toISOString())
             .lt('checkin_time', todayEnd.toISOString())
-            .order('checkin_time', { ascending: false })
-            .limit(1);
             
         if (checkError) throw checkError;
         
@@ -172,8 +168,10 @@ checkoutBtn.addEventListener('click', async function() {
         // 퇴실 시간 업데이트
         const { data, error } = await supabase
             .from('check')
-            .update({ checkout_time: koreaTime.toISOString() })
-            .eq('id', todayCheck[0].id);
+            .update({ checkout_time: now.toISOString() })
+            .eq('student_id', checkoutStudentId)
+            .gte('checkin_time', todayStart.toISOString())
+            .lt('checkin_time', todayEnd.toISOString());
         
         if (error) throw error;
         
