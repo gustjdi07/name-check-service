@@ -41,9 +41,27 @@ document.getElementById('studentIdSubmit').addEventListener('click', function() 
 });
 
 document.getElementById('studentIdInput').addEventListener('keydown', function(e) {
+    // 숫자(0~9), 백스페이스, 탭, 방향키, 엔터만 허용
+    if (
+        !(
+            (e.key >= '0' && e.key <= '9') ||
+            e.key === 'Backspace' ||
+            e.key === 'Tab' ||
+            e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight' ||
+            e.key === 'Delete' ||
+            e.key === 'Enter'
+        )
+    ) {
+        e.preventDefault();
+    }
     if (e.key === 'Enter') {
         document.getElementById('studentIdSubmit').click();
     }
+// 입력값이 숫자가 아닌 경우 자동으로 제거
+document.getElementById('studentIdInput').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
 });
 
 // 출석체크 버튼과 시간 표시 기능
